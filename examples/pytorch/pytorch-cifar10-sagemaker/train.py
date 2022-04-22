@@ -1,3 +1,23 @@
+import wandb
+
+wandb.init(project="project1", entity="brianoh1979h")
+
+wandb.config = {
+  "learning_rate": 0.001,
+  "epochs": 100,
+  "batch_size": 128
+}
+
+wandb.log({"loss": 0.314, "epochs": 5,
+           "inputs": wandb.Image(inputs),
+           "logits": wandb.Histogram(outputs),
+           "captions": wandb.Html(captions)})
+
+#wandb.log({"loss": loss})
+
+# Optional
+wandb.watch(model)
+
 import sagemaker
 from sagemaker.tuner import IntegerParameter, CategoricalParameter, ContinuousParameter, HyperparameterTuner
 from sagemaker.pytorch import PyTorch
@@ -31,21 +51,21 @@ role = os.getenv('SAGEMAKER_ROLE') or sagemaker.get_execution_role()
 wandb.sagemaker_auth(path="source")
 
 # Ensure training data is stored in s3
-inputs = "s3://{}/{}".format(bucket, prefix)
-try:
-    file = os.path.join(prefix, 'cifar-10-python.tar.gz')
-    sagemaker_session.boto_session.resource('s3').Object(bucket, file).load()
-except botocore.exceptions.ClientError as e:
-    transform = transforms.Compose(
-        [transforms.ToTensor(),
-         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+#inputs = "s3://{}/{}".format(bucket, prefix)
+#try:
+#    file = os.path.join(prefix, 'cifar-10-python.tar.gz')
+#    sagemaker_session.boto_session.resource('s3').Object(bucket, file).load()
+#except botocore.exceptions.ClientError as e:
+#    transform = transforms.Compose(
+#        [transforms.ToTensor(),
+#         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-    trainset = torchvision.datasets.CIFAR10(
-        'data', download=True, transform=transform)
-    print("Uploading data...")
-    sagemaker_session.upload_data(
-        path='data', bucket=bucket, key_prefix=prefix)
-print("Using inputs: ", inputs)
+#    trainset = torchvision.datasets.CIFAR10(
+#        'data', download=True, transform=transform)
+#    print("Uploading data...")
+#    sagemaker_session.upload_data(
+#        path='data', bucket=bucket, key_prefix=prefix)
+#print("Using inputs: ", inputs)
 
 estimator = PyTorch(entry_point="cifar10.py",
                     source_dir=os.getcwd() + "/source",
